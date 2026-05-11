@@ -1,7 +1,7 @@
 import { simulateFleetTrajectories, fuseMaritimeIntelligence, REGION_BOUNDS } from './src/services/MaritimeIntelligenceEngine.js';
 
 // Setup Vite plugin for the dev server to simulate API endpoints
-export default function mdaApiPlugin() {
+function mdaApiPlugin() {
   return {
     name: 'mda-api-plugin',
     configureServer(server) {
@@ -10,16 +10,13 @@ export default function mdaApiPlugin() {
       // -------------------------------------------------------------
       server.middlewares.use('/api/ais/gulf', async (req, res) => {
         try {
-          // 1. Obtener contexto geomagnético (dummy for now)
-          const geomagCtx = { intensity: 0.5 };
+          // 1. Obtener contexto geomagnético (ya lo tienes en tu código)
+          const geomagCtx = {}; // await fetchGeomagHN(); // O el específico del Golfo
 
           // 2. Simular la flota base pasando las rutas y el bounding box
-          const GULF_VESSEL_ROUTES = []; // Add dummy data or import actual
-          const GULF_PORTS_SIM = [];     // Add dummy data or import actual
-
           const simFleet = simulateFleetTrajectories(
-            GULF_VESSEL_ROUTES,
-            GULF_PORTS_SIM,
+            [], // GULF_VESSEL_ROUTES
+            [], // GULF_PORTS_SIM
             geomagCtx,
             88888,
             REGION_BOUNDS.GULF_OF_MEXICO
@@ -52,22 +49,23 @@ export default function mdaApiPlugin() {
       // -------------------------------------------------------------
       server.middlewares.use('/api/ais/honduras', async (req, res) => {
         try {
-          const geomagCtx = { intensity: 0.5 };
+          // 1. Obtener contexto geomagnético (ya lo tienes en tu código)
+          const geomagCtx = {}; // await fetchGeomagHN();
 
-          const HONDURAS_VESSEL_ROUTES = [];
-          const HONDURAS_PORTS_SIM = [];
-
+          // 2. Simular la flota base pasando las rutas y el bounding box
           const simFleet = simulateFleetTrajectories(
-            HONDURAS_VESSEL_ROUTES,
-            HONDURAS_PORTS_SIM,
+            [], // HONDURAS_VESSEL_ROUTES
+            [], // HONDURAS_PORTS_SIM
             geomagCtx,
             88888,
             REGION_BOUNDS.HONDURAS
           );
 
+          // 3. Obtener datos en vivo (si existen)
           const liveAis = [];
           const liveGfw = [];
 
+          // 4. Motor de Fusión (Deduplicación inteligente)
           const finalData = await fuseMaritimeIntelligence(
             'HONDURAS',
             liveAis,
@@ -87,3 +85,7 @@ export default function mdaApiPlugin() {
     }
   }
 }
+
+export default {
+  plugins: [mdaApiPlugin()]
+};
